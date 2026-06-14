@@ -1,0 +1,26 @@
+# dependencies
+node_modules/
+web/node_modules/
+
+# env (never commit real keys)
+.env
+.env.local
+web/.env
+web/.env.local
+
+# hardhat
+artifacts/
+cache/
+typechain-types/
+types/
+
+# next.js
+web/.next/
+web/out/
+web/build/
+
+# misc
+.DS_Store
+*.log
+npm-debug.log*
+coverage/
