@@ -11,7 +11,30 @@ contract SkillPass is ERC721, Ownable {
     mapping(address => bool) public isIssuer;
     mapping(address => string) public issuerName;
 
+    struct Certificate {
+        uint256 id;
+        address student;
+        address issuer;
+        string course;
+        string fileName;
+        bytes32 fileHash;
+        uint64 issuedAt;
+        bool revoked;
+    }
+
+    mapping(uint256 => Certificate) private _certificates;
+    mapping(address => uint256[]) private _studentTokens;
+    mapping(bytes32 => uint256) public tokenIdByHash;
+    uint256 public nextId = 1;
+
     event IssuerAdded(address indexed issuer, string name);
+    event CertificateIssued(
+        uint256 indexed id,
+        address indexed student,
+        address indexed issuer,
+        string course,
+        bytes32 fileHash
+    );
 
     modifier onlyIssuer() {
         require(isIssuer[msg.sender], "SkillPass: not an issuer");
@@ -32,5 +55,49 @@ contract SkillPass is ERC721, Ownable {
         isIssuer[issuer] = true;
         issuerName[issuer] = name;
         emit IssuerAdded(issuer, name);
+    }
+
+    function issueCertificate(
+        address student,
+        string calldata course,
+        string calldata fileName,
+        bytes32 fileHash
+    ) external onlyIssuer returns (uint256 id) {
+        require(student != address(0), "SkillPass: zero student");
+        require(fileHash != bytes32(0), "SkillPass: zero hash");
+        require(tokenIdByHash[fileHash] == 0, "SkillPass: file already certified");
+
+        id = nextId++;
+        _certificates[id] = Certificate({
+            id: id,
+            student: student,
+            issuer: msg.sender,
+            course: course,
+            fileName: fileName,
+            fileHash: fileHash,
+            issuedAt: uint64(block.timestamp),
+            revoked: false
+        });
+        _studentTokens[student].push(id);
+        tokenIdByHash[fileHash] = id;
+
+        _safeMint(student, id);
+        emit CertificateIssued(id, student, msg.sender, course, fileHash);
+    }
+
+    function getCertificate(uint256 id) external view returns (Certificate memory) {
+        require(_certificates[id].id != 0, "SkillPass: no such certificate");
+        return _certificates[id];
+    }
+
+    /// @dev Soulbound: minting (from == zero) is allowed, every transfer reverts.
+    function _update(address to, uint256 tokenId, address auth)
+        internal
+        override
+        returns (address)
+    {
+        address from = super._update(to, tokenId, auth);
+        require(from == address(0), "SkillPass: soulbound, non-transferable");
+        return from;
     }
 }
