@@ -19,12 +19,12 @@ This is a monorepo containing three applications:
 
 - `contracts/ChamaGroup.sol` the savings group contract (membership, contribution ledger, m-of-n escrow)
 - `test/ChamaGroup.test.ts` 24 Hardhat tests covering the ledger, access control, threshold logic, and reentrancy
-- `scripts/deploy.ts` and `scripts/seed.ts` deploy to Fuji and seed a believable demo group
+- `scripts/chama/deploy.ts` and `scripts/chama/seed.ts` deploy to Fuji and seed a believable demo group
 - `web-chama/` the Next.js dashboard (wagmi, viem, RainbowKit), styled as warm East African fintech
 
 ## SkillPass TZ
 
-SkillPass is a soulbound certificate verifier and skill passport on Avalanche Fuji. Institutions issue tamper-proof credentials (hashed on-chain, file stored off-chain), students can revoke and reissue, and anyone can verify authenticity.
+SkillPass is a soulbound certificate verifier and skill passport on Avalanche Fuji. Institutions issue tamper-proof credentials (hashed on-chain, file stored off-chain), and anyone can verify authenticity.
 
 ### Deploy and seed
 
@@ -42,9 +42,9 @@ cd web-skillpass && npm run dev    # http://localhost:3000
 
 ### Roles
 
-- **Issuer** (account 0 from DEMO_MNEMONIC) issues credentials to students.
-- **Students** (accounts 1 and 2 from DEMO_MNEMONIC) receive and can revoke their credentials.
-- **Verifier** (anyone) can verify any credential by its ID.
+- **Issuer** (account 0 from DEMO_MNEMONIC) issues credentials to students, and can revoke them.
+- **Students** (accounts 1 and 2 from DEMO_MNEMONIC) hold their credentials as soulbound (non-transferable) NFTs.
+- **Verifier** (anyone) can verify a credential by its id or wallet, or by re-uploading the file to match its on-chain hash.
 
 ### Technical notes
 
@@ -97,24 +97,24 @@ from more than one member (a richer ledger), also fund member indexes 1 and 2.
 ## 3. Deploy and seed on Fuji
 
 ```bash
-npm run deploy:fuji   # prints the ChamaGroup address and the members table
-npm run seed:fuji     # makes the first contributions (skips any unfunded member)
+npm run deploy:chama   # prints the ChamaGroup address and the members table
+npm run seed:chama     # makes the first contributions (skips any unfunded member)
 ```
 
-`deploy:fuji` writes `deployments/43113.json` with the address and members. Copy the printed
+`deploy:chama` writes `deployments/43113.json` with the address and members. Copy the printed
 address into the frontend in the next step.
 
 ## 4. Run the frontend
 
 ```bash
-cd web
+cd web-chama
 npm install
 cp .env.example .env.local
 ```
 
-Edit `web/.env.local`:
+Edit `web-chama/.env.local`:
 
-- `NEXT_PUBLIC_CHAMA_ADDRESS` the address printed by `npm run deploy:fuji`.
+- `NEXT_PUBLIC_CHAMA_ADDRESS` the address printed by `npm run deploy:chama`.
 - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` a free project id from https://cloud.reown.com (optional; injected wallets such as MetaMask work without it).
 - `NEXT_PUBLIC_DEMO_MNEMONIC` the same throwaway mnemonic used for the contract seed (see "Demo signer mode" below).
 - `NEXT_PUBLIC_FUJI_RPC_URL` optional RPC override.
