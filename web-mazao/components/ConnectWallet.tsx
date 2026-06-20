@@ -21,7 +21,7 @@ export function ConnectWallet() {
               </Button>
             ) : chain.unsupported ? (
               <Button variant="gold" size="md" onClick={openChainModal}>
-                Mtandao si sahihi
+                Wrong network
               </Button>
             ) : (
               <button

@@ -17,15 +17,6 @@ export function getErrorMessage(error: unknown): string {
   if (lower.includes("insufficient funds")) {
     return "Salio la gesi halitoshi (insufficient gas funds)";
   }
-  if (lower.includes("already approved")) {
-    return "Mwanachama huyu tayari amekubali";
-  }
-  if (lower.includes("not a member")) {
-    return "Akaunti hii si mwanachama";
-  }
-  if (lower.includes("amount exceeds pool") || lower.includes("insufficient pool")) {
-    return "Kiasi kinazidi salio la kikundi";
-  }
   if (raw.length === 0) return "Hitilafu isiyojulikana (unknown error)";
   return raw.length > 120 ? `${raw.slice(0, 117)}...` : raw;
 }
