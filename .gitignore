@@ -27,3 +27,8 @@ web/build/
 *.log
 npm-debug.log*
 coverage/
+
+# local workflow files (kept on disk, not published)
+.superpowers/
+docs/
+CLAUDE.md
