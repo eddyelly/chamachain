@@ -17,7 +17,12 @@ import { STATUS_LABELS } from "@/lib/mazao/types";
 
 export default function BatchPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const batchId = BigInt(id);
+  let batchId: bigint | undefined;
+  try {
+    batchId = BigInt(id);
+  } catch {
+    batchId = undefined;
+  }
   const { batch, isLoading, isError, refetch } = useBatch(batchId);
 
   const [celebrate, setCelebrate] = useState(false);

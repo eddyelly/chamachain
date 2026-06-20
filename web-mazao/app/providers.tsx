@@ -8,7 +8,7 @@ import { Toaster } from "sonner";
 import "@rainbow-me/rainbowkit/styles.css";
 import { wagmiConfig } from "@/lib/wagmi";
 
-const chamaTheme = lightTheme({
+const mazaoTheme = lightTheme({
   accentColor: "#1f7a3d",
   accentColorForeground: "#f4faf2",
   borderRadius: "large",
@@ -22,7 +22,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <RainbowKitProvider theme={chamaTheme} initialChain={wagmiConfig.chains[0]}>
+        <RainbowKitProvider theme={mazaoTheme} initialChain={wagmiConfig.chains[0]}>
           {children}
           <Toaster
             position="top-center"
