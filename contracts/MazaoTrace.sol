@@ -48,6 +48,8 @@ contract MazaoTrace is Ownable, ReentrancyGuard {
     );
     event BatchPurchased(uint256 indexed id, address indexed buyer, uint256 price);
     event BatchPickedUp(uint256 indexed id, address indexed transporter);
+    event BatchDelivered(uint256 indexed id, address indexed farmer, uint256 price);
+    event BatchCancelled(uint256 indexed id, address indexed buyer, uint256 price);
 
     modifier onlyTransporter() {
         require(isTransporter[msg.sender], "MazaoTrace: not a transporter");
@@ -106,6 +108,41 @@ contract MazaoTrace is Ownable, ReentrancyGuard {
         b.pickedUpAt = uint64(block.timestamp);
 
         emit BatchPickedUp(id, msg.sender);
+    }
+
+    function confirmDelivery(uint256 id) external nonReentrant {
+        Batch storage b = _get(id);
+        require(b.status == Status.InTransit, "MazaoTrace: not in transit");
+        require(msg.sender == b.buyer, "MazaoTrace: not the buyer");
+
+        b.status = Status.Delivered;
+        b.deliveredAt = uint64(block.timestamp);
+
+        (bool ok, ) = b.farmer.call{value: b.price}("");
+        require(ok, "MazaoTrace: payout failed");
+
+        emit BatchDelivered(id, b.farmer, b.price);
+    }
+
+    function cancel(uint256 id) external nonReentrant {
+        Batch storage b = _get(id);
+        require(b.status == Status.Funded, "MazaoTrace: not cancellable");
+        require(msg.sender == b.buyer || msg.sender == b.farmer, "MazaoTrace: not authorized");
+
+        b.status = Status.Cancelled;
+
+        (bool ok, ) = b.buyer.call{value: b.price}("");
+        require(ok, "MazaoTrace: refund failed");
+
+        emit BatchCancelled(id, b.buyer, b.price);
+    }
+
+    function getBatches() external view returns (Batch[] memory list) {
+        uint256 count = nextId - 1;
+        list = new Batch[](count);
+        for (uint256 i = 0; i < count; i++) {
+            list[i] = _batches[i + 1];
+        }
     }
 
     function getBatch(uint256 id) external view returns (Batch memory) {

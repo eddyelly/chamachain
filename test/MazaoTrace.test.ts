@@ -124,4 +124,79 @@ describe("MazaoTrace", function () {
       );
     });
   });
+
+  describe("delivery, cancel, and views", function () {
+    beforeEach(async function () {
+      await mazao.connect(farmer).registerBatch("Cashew", 50n, PRICE());
+      await mazao.addTransporter(await transporter.getAddress(), "Bodaboda Express");
+      await mazao.connect(buyer).purchase(1, { value: PRICE() });
+    });
+
+    it("releases escrow to the farmer on delivery, only by the buyer", async function () {
+      await mazao.connect(transporter).confirmPickup(1);
+      await expect(mazao.connect(transporter).confirmDelivery(1)).to.be.revertedWith(
+        "MazaoTrace: not the buyer",
+      );
+      await expect(mazao.connect(buyer).confirmDelivery(1)).to.changeEtherBalance(
+        ethers,
+        farmer,
+        PRICE(),
+      );
+      const b = await mazao.getBatch(1);
+      expect(b.status).to.equal(3n); // Delivered
+      expect(await ethers.provider.getBalance(await mazao.getAddress())).to.equal(0n);
+    });
+
+    it("rejects delivery before pickup and double delivery", async function () {
+      await expect(mazao.connect(buyer).confirmDelivery(1)).to.be.revertedWith(
+        "MazaoTrace: not in transit",
+      );
+      await mazao.connect(transporter).confirmPickup(1);
+      await mazao.connect(buyer).confirmDelivery(1);
+      await expect(mazao.connect(buyer).confirmDelivery(1)).to.be.revertedWith(
+        "MazaoTrace: not in transit",
+      );
+    });
+
+    it("cancels and refunds the buyer before pickup, by buyer or farmer", async function () {
+      await expect(mazao.connect(buyer).cancel(1)).to.changeEtherBalance(ethers, buyer, PRICE());
+      expect((await mazao.getBatch(1)).status).to.equal(4n); // Cancelled
+    });
+
+    it("rejects cancel after pickup and by a non-party", async function () {
+      await expect(mazao.connect(outsider).cancel(1)).to.be.revertedWith("MazaoTrace: not authorized");
+      await mazao.connect(transporter).confirmPickup(1);
+      await expect(mazao.connect(buyer).cancel(1)).to.be.revertedWith("MazaoTrace: not cancellable");
+    });
+
+    it("returns all batches via getBatches", async function () {
+      await mazao.connect(farmer).registerBatch("Cashew", 10n, PRICE());
+      const list = await mazao.getBatches();
+      expect(list.length).to.equal(2);
+      expect(list[0].id).to.equal(1n);
+      expect(list[1].id).to.equal(2n);
+    });
+  });
+
+  describe("reentrancy", function () {
+    it("blocks a reentrant farmer from double spending on delivery", async function () {
+      const attacker = await ethers.deployContract("MazaoReentrant", []);
+      await attacker.setMazao(await mazao.getAddress());
+      await mazao.addTransporter(await transporter.getAddress(), "Bodaboda Express");
+
+      await attacker.register("Cashew", 50n, PRICE());
+      const attackerAddr = await attacker.getAddress();
+      await attacker.setTarget(1);
+
+      await mazao.connect(buyer).purchase(1, { value: PRICE() });
+      await mazao.connect(transporter).confirmPickup(1);
+      await mazao.connect(buyer).confirmDelivery(1);
+
+      expect(await attacker.reentered()).to.equal(true);
+      // Exactly one payout left the contract: attacker (farmer) holds price, contract holds 0.
+      expect(await ethers.provider.getBalance(attackerAddr)).to.equal(PRICE());
+      expect(await ethers.provider.getBalance(await mazao.getAddress())).to.equal(0n);
+      expect((await mazao.getBatch(1)).status).to.equal(3n);
+    });
+  });
 });
