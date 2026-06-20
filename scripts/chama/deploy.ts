@@ -1,7 +1,7 @@
 import { network } from "hardhat";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { deriveMembers, GROUP_NAME, MEMBER_LABELS, THRESHOLD } from "./lib/members.js";
+import { deriveMembers, GROUP_NAME, MEMBER_LABELS, THRESHOLD } from "../lib/members.js";
 
 async function main(): Promise<void> {
   const mnemonic = process.env.DEMO_MNEMONIC;
@@ -56,7 +56,7 @@ async function main(): Promise<void> {
 
   const dir = join(process.cwd(), "deployments");
   mkdirSync(dir, { recursive: true });
-  const file = join(dir, `${chain.chainId}.json`);
+  const file = join(dir, `chama-${chain.chainId}.json`);
   writeFileSync(file, `${JSON.stringify(record, null, 2)}\n`);
   console.log(`\nWrote ${file}`);
   console.log(`\nNext: set NEXT_PUBLIC_CHAMA_ADDRESS=${address} in web/.env.local`);
