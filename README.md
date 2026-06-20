@@ -13,7 +13,7 @@ This is a monorepo containing three applications:
 
 - **ChamaChain** (frontend in `web-chama/`) - A transparent m-of-n savings group with on-chain escrow.
 - **SkillPass TZ** (frontend in `web-skillpass/`) - A soulbound certificate verifier and skill passport, issuing tamper-proof credentials.
-- **MazaoTrace** (planned) - A produce traceability system with escrow and multi-party consensus.
+- **MazaoTrace** (frontend in `web-mazao/`) - A cashew produce traceability system with marketplace escrow, tracking batches from farm to buyer on Fuji.
 
 ## What is in the box
 
@@ -49,6 +49,36 @@ cd web-skillpass && npm run dev    # http://localhost:3000
 ### Technical notes
 
 The certificate file is hashed in the browser using SHA-256; only the hash is stored on-chain, and the file stays off-chain for privacy and storage efficiency.
+
+## MazaoTrace
+
+MazaoTrace is a cashew produce traceability system on Avalanche Fuji. Farmers register batches, transporters move them from farm to market, and buyers purchase with escrow: payment is locked on-chain until the buyer confirms delivery, at which point it releases to the farmer. A cancel before pickup refunds the buyer. Every step (register, purchase, pickup, deliver, cancel) is an on-chain event, and each batch has a per-batch QR code linking to its detail page on the frontend.
+
+### Roles
+
+- **Farmer** (account 0, deployer/owner) registers batches and receives payment on confirmed delivery.
+- **Transporter** (account 1, added during seed) is allowlisted by the farmer and confirms pickup.
+- **Buyer** (account 2) purchases a batch (locking escrow), confirms delivery, or cancels before pickup.
+
+### Escrow flow
+
+1. `purchase` (buyer) locks the buyer's payment in escrow.
+2. `confirmDelivery` (buyer) releases the escrowed payment to the farmer.
+3. `cancel` (before pickup) refunds the buyer and returns the batch to registered status.
+
+### Deploy and seed
+
+```bash
+npm run deploy:mazao    # prints MazaoTrace address, writes deployments/mazao-43113.json
+# set NEXT_PUBLIC_MAZAO_ADDRESS in web-mazao/.env.local (copy from web-mazao/.env.example)
+npm run seed:mazao      # registers a sample batch, adds transporter, seeds a purchase
+```
+
+### Run the frontend
+
+```bash
+cd web-mazao && npm run dev    # http://localhost:3001
+```
 
 ## The demo flow (ChamaChain)
 
