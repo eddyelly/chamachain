@@ -11,8 +11,8 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary:
-          "bg-primary text-cream shadow-soft hover:bg-primary-deep hover:shadow-lift",
-        gold: "bg-gold-bright text-primary-deep shadow-[var(--shadow-gold)] hover:brightness-105",
+          "bg-primary text-base shadow-soft hover:bg-primary-deep hover:shadow-lift",
+        gold: "bg-gold-bright text-primary-deep shadow-lift hover:brightness-105",
         outline:
           "border border-line-strong bg-surface text-ink hover:bg-surface-sunk hover:border-primary-bright/40",
         ghost: "text-ink hover:bg-surface-sunk",

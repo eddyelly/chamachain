@@ -28,7 +28,7 @@ export function ConnectWallet() {
                 onClick={openAccountModal}
                 className="flex items-center gap-2 rounded-full border border-line bg-surface py-2 pl-2.5 pr-3.5 text-sm font-medium text-ink shadow-soft transition-colors hover:border-primary-bright/40"
               >
-                <span className="h-2.5 w-2.5 rounded-full bg-success" />
+                <span className="h-2.5 w-2.5 rounded-full bg-valid" />
                 <span className="font-mono">{account.displayName}</span>
               </button>
             )}
