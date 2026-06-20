@@ -15,5 +15,6 @@ export function demoIssuerClient(): WalletClient | null {
 }
 
 export function demoStudentAddress(index: number): `0x${string}` {
+  if (!DEMO_ENABLED) return "0x0000000000000000000000000000000000000000";
   return mnemonicToAccount(MNEMONIC, { addressIndex: index }).address;
 }
