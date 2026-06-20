@@ -13,6 +13,9 @@ const config: HardhatUserConfig = {
     version: "0.8.24",
     settings: {
       optimizer: { enabled: true, runs: 200 },
+      // OpenZeppelin v5.6 Bytes.sol (pulled in by ERC721) uses the mcopy opcode.
+      // Avalanche C-Chain supports Cancun, so target it.
+      evmVersion: "cancun",
     },
   },
   networks: {
