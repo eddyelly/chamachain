@@ -3,6 +3,7 @@ pragma solidity ^0.8.24;
 
 import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 /// @title SkillPass
 /// @notice Soulbound credential NFTs. Institutions (issuers) mint non-transferable
@@ -35,6 +36,7 @@ contract SkillPass is ERC721, Ownable {
         string course,
         bytes32 fileHash
     );
+    event CertificateRevoked(uint256 indexed id);
 
     modifier onlyIssuer() {
         require(isIssuer[msg.sender], "SkillPass: not an issuer");
@@ -88,6 +90,56 @@ contract SkillPass is ERC721, Ownable {
     function getCertificate(uint256 id) external view returns (Certificate memory) {
         require(_certificates[id].id != 0, "SkillPass: no such certificate");
         return _certificates[id];
+    }
+
+    function revoke(uint256 id) external {
+        Certificate storage c = _certificates[id];
+        require(c.id != 0, "SkillPass: no such certificate");
+        require(msg.sender == c.issuer || msg.sender == owner(), "SkillPass: not authorized");
+        require(!c.revoked, "SkillPass: already revoked");
+        c.revoked = true;
+        emit CertificateRevoked(id);
+    }
+
+    function certificatesOf(address student) external view returns (Certificate[] memory list) {
+        uint256[] storage ids = _studentTokens[student];
+        list = new Certificate[](ids.length);
+        for (uint256 i = 0; i < ids.length; i++) {
+            list[i] = _certificates[ids[i]];
+        }
+    }
+
+    function isValid(uint256 id) external view returns (bool) {
+        Certificate storage c = _certificates[id];
+        return c.id != 0 && !c.revoked;
+    }
+
+    function verifyByHash(bytes32 fileHash) external view returns (uint256) {
+        return tokenIdByHash[fileHash];
+    }
+
+    function totalCertificates() external view returns (uint256) {
+        return nextId - 1;
+    }
+
+    function tokenURI(uint256 id) public view override returns (string memory) {
+        Certificate memory c = _certificates[id];
+        require(c.id != 0, "SkillPass: no such certificate");
+        string memory status = c.revoked ? "Revoked" : "Valid";
+        string memory json = string(
+            abi.encodePacked(
+                '{"name":"',
+                c.course,
+                '","description":"SkillPass credential issued by ',
+                issuerName[c.issuer],
+                '","attributes":[{"trait_type":"Issuer","value":"',
+                issuerName[c.issuer],
+                '"},{"trait_type":"Status","value":"',
+                status,
+                '"}]}'
+            )
+        );
+        return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
     }
 
     /// @dev Soulbound: minting (from == zero) is allowed, every transfer reverts.

@@ -115,4 +115,46 @@ describe("SkillPass", function () {
       expect(await pass.nextId()).to.equal(3n);
     });
   });
+
+  describe("revocation and views", function () {
+    const HASH_A = "0x" + "33".repeat(32);
+    const HASH_B = "0x" + "44".repeat(32);
+
+    it("revokes and flips isValid, only by issuer or owner", async function () {
+      const s1 = await student.getAddress();
+      await pass.issueCertificate(s1, "C1", "a.pdf", HASH_A);
+      expect(await pass.isValid(1)).to.equal(true);
+
+      await expect(pass.connect(outsider).revoke(1)).to.be.revertedWith(
+        "SkillPass: not authorized",
+      );
+      await expect(pass.revoke(1)).to.emit(pass, "CertificateRevoked").withArgs(1n);
+      expect(await pass.isValid(1)).to.equal(false);
+    });
+
+    it("returns all certificates of a student", async function () {
+      const s1 = await student.getAddress();
+      await pass.issueCertificate(s1, "C1", "a.pdf", HASH_A);
+      await pass.issueCertificate(s1, "C2", "b.pdf", HASH_B);
+      const list = await pass.certificatesOf(s1);
+      expect(list.length).to.equal(2);
+      expect(list[0].course).to.equal("C1");
+      expect(list[1].course).to.equal("C2");
+    });
+
+    it("verifies by file hash and counts totals", async function () {
+      const s1 = await student.getAddress();
+      await pass.issueCertificate(s1, "C1", "a.pdf", HASH_A);
+      expect(await pass.verifyByHash(HASH_A)).to.equal(1n);
+      expect(await pass.verifyByHash(HASH_B)).to.equal(0n);
+      expect(await pass.totalCertificates()).to.equal(1n);
+    });
+
+    it("exposes a tokenURI data URI", async function () {
+      const s1 = await student.getAddress();
+      await pass.issueCertificate(s1, "Solidity", "a.pdf", HASH_A);
+      const uri = await pass.tokenURI(1);
+      expect(uri.startsWith("data:application/json;base64,")).to.equal(true);
+    });
+  });
 });
