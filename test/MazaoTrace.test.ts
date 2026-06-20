@@ -70,4 +70,58 @@ describe("MazaoTrace", function () {
       await expect(mazao.getBatch(99)).to.be.revertedWith("MazaoTrace: no such batch");
     });
   });
+
+  describe("purchase and pickup", function () {
+    beforeEach(async function () {
+      await mazao.connect(farmer).registerBatch("Cashew", 50n, PRICE());
+      await mazao.addTransporter(await transporter.getAddress(), "Bodaboda Express");
+    });
+
+    it("funds escrow on purchase and rejects wrong value or the farmer buying", async function () {
+      const buyerAddr = await buyer.getAddress();
+      await expect(mazao.connect(buyer).purchase(1, { value: PRICE() }))
+        .to.emit(mazao, "BatchPurchased")
+        .withArgs(1n, buyerAddr, PRICE());
+
+      const b = await mazao.getBatch(1);
+      expect(b.buyer).to.equal(buyerAddr);
+      expect(b.status).to.equal(1n); // Funded
+      expect(await ethers.provider.getBalance(await mazao.getAddress())).to.equal(PRICE());
+
+      await expect(
+        mazao.connect(outsider).purchase(1, { value: PRICE() }),
+      ).to.be.revertedWith("MazaoTrace: not available");
+    });
+
+    it("rejects a purchase with the wrong payment or by the farmer", async function () {
+      await mazao.connect(farmer).registerBatch("Cashew", 20n, PRICE());
+      await expect(
+        mazao.connect(buyer).purchase(2, { value: ethers.parseEther("0.001") }),
+      ).to.be.revertedWith("MazaoTrace: wrong payment");
+      await expect(
+        mazao.connect(farmer).purchase(2, { value: PRICE() }),
+      ).to.be.revertedWith("MazaoTrace: farmer cannot buy");
+    });
+
+    it("lets a transporter confirm pickup, only when funded, only transporter", async function () {
+      await mazao.connect(buyer).purchase(1, { value: PRICE() });
+      const tAddr = await transporter.getAddress();
+      await expect(mazao.connect(transporter).confirmPickup(1))
+        .to.emit(mazao, "BatchPickedUp")
+        .withArgs(1n, tAddr);
+      const b = await mazao.getBatch(1);
+      expect(b.transporter).to.equal(tAddr);
+      expect(b.status).to.equal(2n); // InTransit
+
+      await expect(mazao.connect(buyer).confirmPickup(1)).to.be.revertedWith(
+        "MazaoTrace: not a transporter",
+      );
+    });
+
+    it("rejects pickup of a batch that is not funded", async function () {
+      await expect(mazao.connect(transporter).confirmPickup(1)).to.be.revertedWith(
+        "MazaoTrace: not funded",
+      );
+    });
+  });
 });

@@ -46,6 +46,8 @@ contract MazaoTrace is Ownable, ReentrancyGuard {
         uint256 quantityKg,
         uint256 price
     );
+    event BatchPurchased(uint256 indexed id, address indexed buyer, uint256 price);
+    event BatchPickedUp(uint256 indexed id, address indexed transporter);
 
     modifier onlyTransporter() {
         require(isTransporter[msg.sender], "MazaoTrace: not a transporter");
@@ -80,6 +82,30 @@ contract MazaoTrace is Ownable, ReentrancyGuard {
         b.registeredAt = uint64(block.timestamp);
 
         emit BatchRegistered(id, msg.sender, crop, quantityKg, price);
+    }
+
+    function purchase(uint256 id) external payable {
+        Batch storage b = _get(id);
+        require(b.status == Status.Registered, "MazaoTrace: not available");
+        require(msg.sender != b.farmer, "MazaoTrace: farmer cannot buy");
+        require(msg.value == b.price, "MazaoTrace: wrong payment");
+
+        b.buyer = msg.sender;
+        b.status = Status.Funded;
+        b.fundedAt = uint64(block.timestamp);
+
+        emit BatchPurchased(id, msg.sender, b.price);
+    }
+
+    function confirmPickup(uint256 id) external onlyTransporter {
+        Batch storage b = _get(id);
+        require(b.status == Status.Funded, "MazaoTrace: not funded");
+
+        b.transporter = msg.sender;
+        b.status = Status.InTransit;
+        b.pickedUpAt = uint64(block.timestamp);
+
+        emit BatchPickedUp(id, msg.sender);
     }
 
     function getBatch(uint256 id) external view returns (Batch memory) {
