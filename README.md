@@ -77,7 +77,7 @@ npm run seed:mazao      # registers a sample batch, adds transporter, seeds a pu
 ### Run the frontend
 
 ```bash
-cd web-mazao && npm run dev    # http://localhost:3001
+cd web-mazao && npm run dev    # http://localhost:3000
 ```
 
 ## The demo flow (ChamaChain)
