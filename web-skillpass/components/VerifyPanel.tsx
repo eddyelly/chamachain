@@ -103,7 +103,7 @@ export function VerifyPanel() {
                 <p className="text-sm text-ink-soft">
                   {status === "valid" ? "Genuine credential" : "This credential was revoked"}, issued by{" "}
                   <span className="font-medium text-ink">
-                    {(issuerName.data as string | undefined) ?? truncate(cert.issuer)}
+                    {(issuerName.data as string | undefined) || truncate(cert.issuer)}
                   </span>
                 </p>
               </div>

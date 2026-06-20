@@ -30,9 +30,11 @@ export default function PassportPage({ params }: { params: Promise<{ address: st
           Skill passport
         </p>
         <h1 className="mt-1 font-mono text-xl font-semibold text-ink">{truncate(holder, 10, 8)}</h1>
-        <p className="mt-1 text-sm text-ink-soft">
-          {certificates.length} credential{certificates.length === 1 ? "" : "s"} held by this wallet
-        </p>
+        {!isLoading && (
+          <p className="mt-1 text-sm text-ink-soft">
+            {certificates.length} credential{certificates.length === 1 ? "" : "s"} held by this wallet
+          </p>
+        )}
 
         {isLoading ? (
           <p className="mt-8 text-sm text-ink-soft">Loading credentials...</p>
