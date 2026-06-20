@@ -1,7 +1,7 @@
 import { network } from "hardhat";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { deriveMembers } from "./lib/members.js";
+import { deriveMembers } from "../lib/members.js";
 
 interface Deployment {
   chainId: number;
@@ -20,7 +20,7 @@ function resolveAddress(chainId: bigint): string {
   if (process.env.CHAMA_ADDRESS) {
     return process.env.CHAMA_ADDRESS;
   }
-  const file = join(process.cwd(), "deployments", `${chainId}.json`);
+  const file = join(process.cwd(), "deployments", `chama-${chainId}.json`);
   try {
     const record = JSON.parse(readFileSync(file, "utf8")) as Deployment;
     return record.address;

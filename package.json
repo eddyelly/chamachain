@@ -7,8 +7,10 @@
   "scripts": {
     "compile": "hardhat compile",
     "test": "hardhat test",
-    "deploy:fuji": "hardhat run scripts/deploy.ts --network fuji",
-    "seed:fuji": "hardhat run scripts/seed.ts --network fuji"
+    "deploy:chama": "hardhat run scripts/chama/deploy.ts --network fuji",
+    "seed:chama": "hardhat run scripts/chama/seed.ts --network fuji",
+    "deploy:skillpass": "hardhat run scripts/skillpass/deploy.ts --network fuji",
+    "seed:skillpass": "hardhat run scripts/skillpass/seed.ts --network fuji"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-mocha-ethers": "^3.0.7",

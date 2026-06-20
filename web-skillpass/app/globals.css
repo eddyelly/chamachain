@@ -1,0 +1,105 @@
+@import "tailwindcss";
+
+/* SkillPass TZ tokens: cool official credential identity. Indigo and violet, foil seal,
+   crisp white cards. Deliberately distinct from ChamaChain's warm earthy ledger. */
+@theme {
+  --color-base: #f5f4fb;
+  --color-base-deep: #ebe9f7;
+  --color-surface: #ffffff;
+  --color-surface-sunk: #f1f0fb;
+
+  --color-ink: #14122b;
+  --color-ink-soft: #5b5878;
+  --color-ink-faint: #908dad;
+
+  --color-primary: #3a2db5;
+  --color-primary-deep: #271d86;
+  --color-primary-bright: #5b4ee6;
+  --color-primary-tint: #e4e0fb;
+
+  --color-violet: #7c3aed;
+  --color-seal: #b8932f;
+  --color-seal-tint: #f3e8c8;
+
+  --color-valid: #1f9d6b;
+  --color-invalid: #d23b53;
+
+  --color-line: #e3e0f3;
+  --color-line-strong: #cdc8ec;
+
+  --color-gold: var(--color-seal);
+  --color-gold-bright: var(--color-seal);
+
+  --font-display: var(--font-sora), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-onest), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-plex), ui-monospace, "SF Mono", monospace;
+
+  --radius-card: 1.25rem;
+
+  --shadow-soft: 0 1px 2px rgba(20, 18, 43, 0.04), 0 10px 30px -12px rgba(20, 18, 43, 0.14);
+  --shadow-lift: 0 2px 6px rgba(20, 18, 43, 0.07), 0 24px 60px -20px rgba(39, 29, 134, 0.28);
+
+  --ease-out-soft: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@layer base {
+  body {
+    background-color: var(--color-base);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background-color: var(--color-primary-tint);
+    color: var(--color-primary-deep);
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-primary-bright);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  .tnum {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  /* Foil seal gradient for the verification stamp. */
+  .foil {
+    background-image: conic-gradient(
+      from 140deg,
+      var(--color-seal),
+      #e9d28a,
+      var(--color-seal),
+      #d9b85a,
+      var(--color-seal)
+    );
+  }
+  .grid-paper {
+    background-image: linear-gradient(var(--color-line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
+    background-size: 26px 26px;
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes popIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes sealIn {
+  from { opacity: 0; transform: rotate(-18deg) scale(1.6); }
+  to { opacity: 1; transform: rotate(-8deg) scale(1); }
+}

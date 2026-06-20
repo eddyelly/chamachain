@@ -7,14 +7,50 @@ escrow that releases only when an m-of-n threshold of members approves (default 
 The design goal is trust: the on-chain ledger is the visual hero, money moves transparently
 among people who know each other, and every step is verifiable on Snowtrace.
 
+## Projects
+
+This is a monorepo containing three applications:
+
+- **ChamaChain** (frontend in `web-chama/`) - A transparent m-of-n savings group with on-chain escrow.
+- **SkillPass TZ** (frontend in `web-skillpass/`) - A soulbound certificate verifier and skill passport, issuing tamper-proof credentials.
+- **MazaoTrace** (planned) - A produce traceability system with escrow and multi-party consensus.
+
 ## What is in the box
 
 - `contracts/ChamaGroup.sol` the savings group contract (membership, contribution ledger, m-of-n escrow)
 - `test/ChamaGroup.test.ts` 24 Hardhat tests covering the ledger, access control, threshold logic, and reentrancy
-- `scripts/deploy.ts` and `scripts/seed.ts` deploy to Fuji and seed a believable demo group
-- `web/` the Next.js dashboard (wagmi, viem, RainbowKit), styled as warm East African fintech
+- `scripts/chama/deploy.ts` and `scripts/chama/seed.ts` deploy to Fuji and seed a believable demo group
+- `web-chama/` the Next.js dashboard (wagmi, viem, RainbowKit), styled as warm East African fintech
 
-## The demo flow
+## SkillPass TZ
+
+SkillPass is a soulbound certificate verifier and skill passport on Avalanche Fuji. Institutions issue tamper-proof credentials (hashed on-chain, file stored off-chain), and anyone can verify authenticity.
+
+### Deploy and seed
+
+```bash
+npm run deploy:skillpass    # prints address, writes deployments/skillpass-43113.json
+# set NEXT_PUBLIC_SKILLPASS_ADDRESS in web-skillpass/.env.local (+ NEXT_PUBLIC_DEMO_MNEMONIC)
+npm run seed:skillpass      # issues 2 sample credentials
+```
+
+### Run the frontend
+
+```bash
+cd web-skillpass && npm run dev    # http://localhost:3000
+```
+
+### Roles
+
+- **Issuer** (account 0 from DEMO_MNEMONIC) issues credentials to students, and can revoke them.
+- **Students** (accounts 1 and 2 from DEMO_MNEMONIC) hold their credentials as soulbound (non-transferable) NFTs.
+- **Verifier** (anyone) can verify a credential by its id or wallet, or by re-uploading the file to match its on-chain hash.
+
+### Technical notes
+
+The certificate file is hashed in the browser using SHA-256; only the hash is stored on-chain, and the file stays off-chain for privacy and storage efficiency.
+
+## The demo flow (ChamaChain)
 
 1. Open the app. It loads the group dashboard with the existing members and a populated ledger, and shows it is on Fuji.
 2. A member contributes test AVAX. The ledger updates publicly and the pooled balance rises, with a "verified on-chain" treatment.
@@ -61,24 +97,24 @@ from more than one member (a richer ledger), also fund member indexes 1 and 2.
 ## 3. Deploy and seed on Fuji
 
 ```bash
-npm run deploy:fuji   # prints the ChamaGroup address and the members table
-npm run seed:fuji     # makes the first contributions (skips any unfunded member)
+npm run deploy:chama   # prints the ChamaGroup address and the members table
+npm run seed:chama     # makes the first contributions (skips any unfunded member)
 ```
 
-`deploy:fuji` writes `deployments/43113.json` with the address and members. Copy the printed
+`deploy:chama` writes `deployments/43113.json` with the address and members. Copy the printed
 address into the frontend in the next step.
 
 ## 4. Run the frontend
 
 ```bash
-cd web
+cd web-chama
 npm install
 cp .env.example .env.local
 ```
 
-Edit `web/.env.local`:
+Edit `web-chama/.env.local`:
 
-- `NEXT_PUBLIC_CHAMA_ADDRESS` the address printed by `npm run deploy:fuji`.
+- `NEXT_PUBLIC_CHAMA_ADDRESS` the address printed by `npm run deploy:chama`.
 - `NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID` a free project id from https://cloud.reown.com (optional; injected wallets such as MetaMask work without it).
 - `NEXT_PUBLIC_DEMO_MNEMONIC` the same throwaway mnemonic used for the contract seed (see "Demo signer mode" below).
 - `NEXT_PUBLIC_FUJI_RPC_URL` optional RPC override.
