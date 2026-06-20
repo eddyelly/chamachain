@@ -31,7 +31,7 @@ export function Providers({ children }: { children: ReactNode }) {
                 toast:
                   "!bg-surface !border !border-line !text-ink !rounded-2xl !shadow-[0_2px_6px_rgba(33,28,23,0.06),0_24px_60px_-20px_rgba(33,28,23,0.22)] !font-sans",
                 description: "!text-ink-soft",
-                actionButton: "!bg-primary !text-cream",
+                actionButton: "!bg-primary !text-base",
               },
             }}
           />
