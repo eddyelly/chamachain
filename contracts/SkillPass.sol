@@ -5,6 +5,9 @@ import {ERC721} from "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
+/// @title SkillPass
+/// @notice Soulbound credential NFTs. Institutions (issuers) mint non-transferable
+///         certificates to a student's wallet. The wallet becomes a public skill passport.
 contract SkillPass is ERC721, Ownable {
     mapping(address => bool) public isIssuer;
     mapping(address => string) public issuerName;
@@ -139,6 +142,7 @@ contract SkillPass is ERC721, Ownable {
         return string(abi.encodePacked("data:application/json;base64,", Base64.encode(bytes(json))));
     }
 
+    /// @dev Soulbound: minting (from == zero) is allowed, every transfer reverts.
     function _update(address to, uint256 tokenId, address auth)
         internal
         override
