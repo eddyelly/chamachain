@@ -4,11 +4,6 @@ pragma solidity ^0.8.24;
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-/// @title MazaoTrace
-/// @notice Cashew produce traceability with marketplace escrow. A batch moves
-///         Registered -> Funded -> InTransit -> Delivered, with the buyer's payment held in
-///         escrow and released to the farmer only on confirmed delivery. Cancel (before pickup)
-///         refunds the buyer.
 contract MazaoTrace is Ownable, ReentrancyGuard {
     enum Status {
         Registered,
