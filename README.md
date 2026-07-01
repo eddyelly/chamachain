@@ -11,9 +11,9 @@ among people who know each other, and every step is verifiable on Snowtrace.
 
 This is a monorepo containing three applications:
 
-- **ChamaChain** (frontend in `web-chama/`) - A transparent m-of-n savings group with on-chain escrow.
-- **SkillPass TZ** (frontend in `web-skillpass/`) - A soulbound certificate verifier and skill passport, issuing tamper-proof credentials.
-- **MazaoTrace** (frontend in `web-mazao/`) - A cashew produce traceability system with marketplace escrow, tracking batches from farm to buyer on Fuji.
+- **ChamaChain** (frontend in `web-chama/`) - A transparent m-of-n savings group with on-chain escrow. Live: https://chamachain-psi.vercel.app
+- **SkillPass TZ** (frontend in `web-skillpass/`) - A soulbound certificate verifier and skill passport, issuing tamper-proof credentials. Live: https://skillpasstz.vercel.app
+- **MazaoTrace** (frontend in `web-mazao/`) - A cashew produce traceability system with marketplace escrow, tracking batches from farm to buyer on Fuji. Live: https://mazaotrace.vercel.app
 
 ## What is in the box
 

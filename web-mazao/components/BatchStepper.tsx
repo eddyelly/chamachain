@@ -8,12 +8,10 @@ const STEPS = [
   { label: "Delivered", icon: PackageCheck },
 ] as const;
 
-/// Horizontal journey: filled up to the current status. Cancelled (status 4) is shown as a
-/// stopped journey at the Funded step.
+
 export function BatchStepper({ status, compact = false }: { status: number; compact?: boolean }) {
   const cancelled = status === 4;
-  const reached = cancelled ? 1 : status; // index of the last completed step
-
+  const reached = cancelled ? 1 : status; 
   return (
     <div className="flex items-center">
       {STEPS.map((step, i) => {

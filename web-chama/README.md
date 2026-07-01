@@ -9,6 +9,8 @@ all update in real time, and the threshold-th approval is the moment funds relea
 This README documents what the app does, how it is built, and the full stack, so it can be lifted
 straight into a deck.
 
+**Live demo:** https://chamachain-psi.vercel.app
+
 ---
 
 ## 1. What it is (the elevator pitch)
